@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Successful</title>
+    <title>Logged Out</title>
     <style>
         /* Background styling */
         body {
@@ -16,7 +16,7 @@
             margin: 0;
         }
 
-        /* Login success container */
+        /* Logout container */
         .container {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(12px);
@@ -43,7 +43,7 @@
         .user-icon {
             width: 80px;
             height: 80px;
-            background: #2874A6;
+            background: #d9534f;
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -82,23 +82,23 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .dashboard-btn {
+        .home-btn {
             background: #4CAF50;
             color: white;
         }
 
-        .dashboard-btn:hover {
+        .home-btn:hover {
             background: #388E3C;
             transform: translateY(-2px);
         }
 
-        .logout-btn {
-            background: #d9534f;
+        .login-btn {
+            background: #2874A6;
             color: white;
         }
 
-        .logout-btn:hover {
-            background: #c9302c;
+        .login-btn:hover {
+            background: #1f5b7a;
             transform: translateY(-2px);
         }
     </style>
@@ -106,7 +106,7 @@
 <body>
 
     <div class="container">
-        <h2> Login Successful!</h2>
+        <h2>You have been logged out.</h2>
 
         <!-- User Icon (SVG) -->
         <div class="user-icon">
@@ -115,20 +115,11 @@
             </svg>
         </div>
 
-        <p>Welcome, <strong id="username">{{ username }}</strong>!</p>
-
-        <a href="/dashboard" class="btn dashboard-btn">User Info</a>
-        <!--<a href="/logout" class="btn logout-btn">Logout</a>-->
-        <a href="{% url 'google_logout' %}" class="btn logout-btn">Logout</a>
+        <p>We hope to see you again soon!</p>
 
         
+        <a href="{% url 'google_login' %}" class="btn login-btn">Login Again</a>
     </div>
-
-    <script>
-        // Example: Replace these values with dynamic ones from your backend
-        //const userName = "John Doe";  // Replace with actual user data
-        //document.getElementById("username").innerText = userName;
-    </script>
 
 </body>
 </html>

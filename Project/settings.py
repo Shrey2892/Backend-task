@@ -135,3 +135,10 @@ CHANNEL_LAYERS = {
     },
 }
 
+
+# settings.py
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"  # or db if using DB sessions
+SESSION_COOKIE_AGE = 60 * 60 * 24  # 1 day
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
+
