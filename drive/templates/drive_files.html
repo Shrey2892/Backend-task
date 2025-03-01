@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Drive Files</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #b3cdd1, #5c8599);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 420px;
+            transition: transform 0.3s;
+        }
+        .container:hover {
+            transform: scale(1.03);
+        }
+        h2 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            color: #fff;
+        }
+        a, button {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-download { background: #4CAF50; color: white; }
+        .btn-download:hover { background: #388E3C; }
+        .btn-delete { background: #d9534f; color: white; }
+        .btn-delete:hover { background: #c9302c; }
+        .btn-upload { background: #2874A6; color: white; }
+        .btn-upload:hover { background: #1B5C87; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Google Drive Files</h2>
+        <ul>
+            {% for file in files %}
+                <li>
+                    {{ file.name }} -
+                    <a href="{% url 'download_google_drive_file' file.id %}" class="btn-download">Download</a>
+                    <a href="{% url 'delete_google_drive_file' file.id %}" class="btn-delete">Delete</a>
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'upload_to_google_drive' %}" class="btn-upload">Upload a File</a>
+    </div>
+</body>
+</html>

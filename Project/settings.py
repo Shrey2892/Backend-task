@@ -128,10 +128,17 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-ASGI_APPLICATION = 'project.asgi.application'
+ASGI_APPLICATION = 'Project.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
+
+
+# settings.py
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"  # or db if using DB sessions
+SESSION_COOKIE_AGE = 60 * 60 * 24  # 1 day
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
 
