@@ -130,7 +130,8 @@
         document.querySelector("#chat-message-submit").onclick = function() {
             const messageInput = document.querySelector("#chat-message-input");
             if (messageInput.value.trim() !== "") {
-                chatSocket.send(JSON.stringify({"message": messageInput.value, "username": "{{ request.user.username }}" || "Guest"}));
+                chatSocket.send(JSON.stringify({"message": messageInput.value, "username": "{{ request.user.username|default:'Guest' }}"}))
+
                 messageInput.value = "";
             }
         };
