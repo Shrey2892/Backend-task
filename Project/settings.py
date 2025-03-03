@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from urllib.parse import urlparse
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +29,20 @@ SECRET_KEY = 'django-insecure-1wtqywv1de(0tuv(_8)zxrt#!4nxbi5f98xpo^e%x^-#-4_63#
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+
+# Add these at the top of your settings.py
+
+
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://taskdb_owner:npg_lOtZ0HBcq3KA@ep-wild-butterfly-a1vflq1y-pooler.ap-southeast-1.aws.neon.tech:5432/taskdb")
+
+# Replace the DATABASES section of your settings.py with this
+DATABASES = {
+    'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
+}
+
+
+
 
 
 # Application definition
@@ -78,12 +95,12 @@ WSGI_APPLICATION = 'Project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -129,11 +146,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 ASGI_APPLICATION = 'Project.asgi.application'
+
+
+
+# WebSocket Channel Layer (Ensure Redis is installed and running)
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
 }
+
+
 
 
 # settings.py
@@ -141,4 +164,9 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"  # or db if u
 SESSION_COOKIE_AGE = 60 * 60 * 24  # 1 day
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = True
+
+AUTH_USER_MODEL = "google_auth.CustomUser"
+
+
+
 

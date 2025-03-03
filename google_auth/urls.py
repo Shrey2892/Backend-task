@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import google_login, google_callback,logout_view,get_google_user_info,google_logout,list_google_drive_files
+from .views import google_login, google_callback,logout_view,get_google_user_info,google_logout,list_google_drive_files,get_all_users
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -10,4 +10,6 @@ urlpatterns = [
     path('google/drive/files',list_google_drive_files,name="drive-files"),
     path('logout/',logout_view,name="logout"),
     path('google_logout',google_logout,name="google_logout"),
+    path('users/',get_all_users,name="users"),
+
 ]

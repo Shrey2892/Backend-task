@@ -80,10 +80,26 @@
 <body>
     <div class="chat-container">
         <h2>Enter Chat Room</h2>
-        <form action="{% url 'chat_room' room_name='test' %}" method="get">
+        <!--<form action="{% url 'chat_room' room_name='test' %}" method="get">
             <input type="text" name="room_name" placeholder="Enter Room Name" required>
             <button type="submit">Join</button>
+        </form>-->
+        <form id="chat-form">
+            <input type="text" id="room-name-input" placeholder="Enter Room Name" required>
+            <button type="submit">Join</button>
         </form>
+        
     </div>
 </body>
+<script>
+    document.getElementById("chat-form").addEventListener("submit", function(event) {
+        event.preventDefault();  // Prevent form submission
+        let roomName = document.getElementById("room-name-input").value.trim();
+
+        if (roomName) {
+            window.location.href = `/chat/${roomName}/`;  // Redirect to the chat room
+        }
+    });
+</script>
+
 </html>
