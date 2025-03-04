@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Drive API</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchGoogleDriveFiles();
+        });
+
+        function fetchGoogleDriveFiles() {
+            fetch("/api/files/", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Token {{ user.auth_token }}",
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let fileList = document.getElementById("file-list");
+                fileList.innerHTML = "";
+                data.forEach(file => {
+                    fileList.innerHTML += `
+                        <li>
+                            ${file.name} 
+                            <button onclick="downloadFile('${file.id}')">Download</button>
+                            <button onclick="deleteFile('${file.id}')">Delete</button>
+                        </li>
+                    `;
+                });
+            })
+            .catch(error => console.error("Error fetching files:", error));
+        }
+
+        function uploadFile() {
+            let fileInput = document.getElementById("file-input");
+            let formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            fetch("/api/upload/", {
+                method: "POST",
+                headers: {
+                    "Authorization": "Token {{ user.auth_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("File uploaded successfully!");
+                fetchGoogleDriveFiles();
+            })
+            .catch(error => console.error("Error uploading file:", error));
+        }
+
+        function downloadFile(fileId) {
+            window.location.href = `/api/download/${fileId}/`;
+        }
+
+        function deleteFile(fileId) {
+            fetch(`/api/delete/${fileId}/`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": "Token {{ user.auth_token }}",
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => {
+                if (response.status === 204) {
+                    alert("File deleted successfully!");
+                    fetchGoogleDriveFiles();
+                }
+            })
+            .catch(error => console.error("Error deleting file:", error));
+        }
+    </script>
+</head>
+<body>
+    <h1>Google Drive API</h1>
+
+    <!-- File Upload -->
+    <input type="file" id="file-input">
+    <button onclick="uploadFile()">Upload File</button>
+
+    <h2>Your Files</h2>
+    <ul id="file-list"></ul>
+</body>
+</html>

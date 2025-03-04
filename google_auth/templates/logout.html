@@ -82,16 +82,6 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .home-btn {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .home-btn:hover {
-            background: #388E3C;
-            transform: translateY(-2px);
-        }
-
         .login-btn {
             background: #2874A6;
             color: white;
@@ -117,9 +107,22 @@
 
         <p>We hope to see you again soon!</p>
 
-        
         <a href="{% url 'google_login' %}" class="btn login-btn">Login Again</a>
     </div>
+
+    <!-- Prevent backtracking -->
+    <script>
+        // Disable back button
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.pushState(null, null, location.href);
+        };
+
+        // Optional: Redirect user to login page if they try to go back
+        window.addEventListener('popstate', function () {
+            window.location.href = "{% url 'google_logout' %}";
+        });
+    </script>
 
 </body>
 </html>

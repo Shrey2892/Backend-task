@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from .models import CustomUser
 import logging
 
@@ -26,59 +26,16 @@ def google_login(request):
         "&scope=openid email profile https://www.googleapis.com/auth/drive.file"
         "&access_type=offline"  # Ensures refresh_token is received
         "&prompt=consent"  # Forces Google to always return a refresh token
-
     )
     return redirect(auth_url)
 
+
 def google_callback(request):
-    """ Handles Google OAuth callback and fetches user info. """
-    code = request.GET.get("code")
-    if not code:
-        return JsonResponse({"error": "Authorization code missing"}, status=400)
-    
-    token_url = "https://oauth2.googleapis.com/token"
-    data = {
-        "code": code,
-        "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-        "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
-        "redirect_uri": os.getenv("GOOGLE_REDIRECT_URI"),
-        "grant_type": "authorization_code",
-
-    }
-    
-    response = requests.post(token_url, data=data)
-    token_info = response.json()
-    
-    if "error" in token_info:
-        return JsonResponse({"error": token_info.get("error_description", "Unknown error")}, status=400)
-    
-    request.session["access_token"] = token_info.get("access_token")
-    request.session["refresh_token"] = token_info.get("refresh_token")
-    expires_in = token_info.get("expires_in", 3600)
-    request.session["expires_at"] = (now() + timedelta(seconds=expires_in)).isoformat()
-    request.session.set_expiry(expires_in)
-    
-    user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
-    headers = {"Authorization": f"Bearer {token_info['access_token']}"}
-    user_response = requests.get(user_info_url, headers=headers)
-    user_data = user_response.json()
-    
-    request.session["username"] = user_data.get("name", "User")
-    request.session["email"] = user_data.get("email", "N/A")
-    request.session["profile_picture"] = user_data.get("picture", None)
-    
-    return render(request, "success.html", {"username": user_data.get("name"), "profile_picture": user_data.get("picture")})
-
-
-
-
-def googles_callback(request):
-    """Handles Google OAuth callback, fetches user info, and stores credentials."""
+    """ Handles Google OAuth callback, fetches user info, and manages session. """
     code = request.GET.get("code")
     if not code:
         return JsonResponse({"error": "Authorization code missing"}, status=400)
 
-    # Exchange authorization code for access token
     token_url = "https://oauth2.googleapis.com/token"
     data = {
         "code": code,
@@ -98,12 +55,6 @@ def googles_callback(request):
     refresh_token = token_info.get("refresh_token")
     expires_in = token_info.get("expires_in", 3600)
 
-    # Store tokens in session
-    request.session["access_token"] = access_token
-    request.session["refresh_token"] = refresh_token
-    request.session["expires_at"] = (now() + timedelta(seconds=expires_in)).isoformat()
-    request.session.set_expiry(expires_in)
-
     # Fetch user info
     user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -113,6 +64,7 @@ def googles_callback(request):
     google_id = user_data.get("id")
     email = user_data.get("email")
     name = user_data.get("name")
+    print(name)
     profile_picture = user_data.get("picture")
 
     # Save or update user in database
@@ -130,15 +82,24 @@ def googles_callback(request):
     # Log the user in
     login(request, user)
 
-    # Redirect to the Drive upload page after login
-    return redirect("upload_to_google_drive")
+    # Store user session data
+    request.session["user_id"] = user.id
+    request.session["user_email"] = user.email
+    request.session["is_authenticated"] = True
+    request.session["access_token"] = access_token
+    request.session["refresh_token"] = refresh_token
+    request.session["expires_at"] = (now() + timedelta(seconds=expires_in)).isoformat()
+    request.session.set_expiry(expires_in)
 
+    return redirect("login_view")
 
+def login_view(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return redirect("google_login")  # Redirect to login if session is missing
 
-
-
-
-
+    user = CustomUser.objects.get(id=user_id)
+    return render(request, "success.html", {"username": user.username})  # Pass username
 
 
 
@@ -150,13 +111,13 @@ def refresh_access_token(request):
             expires_at = make_aware(datetime.fromisoformat(expires_at))
         except ValueError:
             expires_at = None
-    
+
     if not expires_at or now() >= expires_at:
         refresh_token = request.session.get("refresh_token")
         if not refresh_token:
             request.session.flush()
             return JsonResponse({"error": "Session expired. Please log in again."}, status=401)
-        
+
         token_url = "https://oauth2.googleapis.com/token"
         data = {
             "client_id": os.getenv("GOOGLE_CLIENT_ID"),
@@ -164,33 +125,48 @@ def refresh_access_token(request):
             "refresh_token": refresh_token,
             "grant_type": "refresh_token",
         }
-        
+
         response = requests.post(token_url, data=data)
         token_info = response.json()
-        
+
         if "error" in token_info:
             request.session.flush()
             return JsonResponse({"error": "Session expired. Please log in again."}, status=401)
-        
+
         request.session["access_token"] = token_info.get("access_token")
         expires_in = token_info.get("expires_in", 3600)
         request.session["expires_at"] = (now() + timedelta(seconds=expires_in)).isoformat()
         request.session.set_expiry(expires_in)
-    
+
     return request.session.get("access_token")
 
-def get_google_user_info(request):
+
+def get_google_user_infos(request):
     """ Fetches user info from Google API with token refresh handling. """
     access_token = refresh_access_token(request)
     if not isinstance(access_token, str):
         return access_token  # Return error if refresh failed
-    
+
     user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
     headers = {"Authorization": f"Bearer {access_token}"}
     response = requests.get(user_info_url, headers=headers)
     return JsonResponse(response.json())
 
 
+def get_google_user_info(request):
+    """ Fetches user info from Google API with token refresh handling. """
+    access_token = refresh_access_token(request)
+    if not isinstance(access_token, str):
+        return JsonResponse({"error": "Failed to refresh access token"}, status=401)
+
+    user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(user_info_url, headers=headers)
+    
+    if response.status_code == 200:
+        return JsonResponse(response.json())  # Return user data
+    else:
+        return JsonResponse({"error": "Failed to fetch user info"}, status=400)
 
 
 def list_google_drive_files(request):
@@ -211,8 +187,13 @@ def google_logout(request):
     token = request.session.get("access_token")
     if token:
         requests.post("https://accounts.google.com/o/oauth2/revoke", params={"token": token})
+    
+    # Clear session data
     request.session.flush()
+    
+    logout(request)  # Log out user from Django session
     return HttpResponseRedirect(reverse("logout"))  # Redirect to logout page
+
 
 def logout_view(request):
     """ Renders the logout page. """
@@ -220,8 +201,6 @@ def logout_view(request):
 
 
 def get_all_users(request):
+    """ Fetch all users from the database. """
     users = list(CustomUser.objects.values())
     return JsonResponse({"users": users})
-
-
-

@@ -1,10 +1,11 @@
 import requests
 import os
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from dotenv import load_dotenv
+from .models import GoogleDriveFile
 
 load_dotenv()
 
@@ -19,7 +20,7 @@ def get_access_token(request):
 
 
 def list_google_drive_files(request):
-    """Fetches the user's Google Drive files using direct API requests."""
+    """Fetches the user's Google Drive files using direct API requests and stores them in the database."""
     access_token = get_access_token(request)
     if not isinstance(access_token, str):
         return access_token  # Redirect if no token
@@ -30,11 +31,19 @@ def list_google_drive_files(request):
     response = requests.get(url, headers=headers)
     files = response.json().get("files", [])
 
+    # Save files to the database (if not already saved)
+    for file in files:
+        GoogleDriveFile.objects.get_or_create(
+            user=request.user,
+            file_id=file["id"],
+            defaults={"name": file["name"]}
+        )
+
     return render(request, "drive_files.html", {"files": files})
 
 
 def download_google_drive_file(request, file_id):
-    """Downloads a file from Google Drive using direct API requests."""
+    """Downloads a file from Google Drive."""
     access_token = get_access_token(request)
     if not isinstance(access_token, str):
         return access_token
@@ -44,16 +53,16 @@ def download_google_drive_file(request, file_id):
     
     response = requests.get(url, headers=headers, stream=True)
     if response.status_code == 200:
-        file_name = f"downloaded_{file_id}.file"
+        file_obj = get_object_or_404(GoogleDriveFile, file_id=file_id)
         response_obj = HttpResponse(response.content, content_type="application/octet-stream")
-        response_obj["Content-Disposition"] = f'attachment; filename="{file_name}"'
+        response_obj["Content-Disposition"] = f'attachment; filename="{file_obj.name}"'
         return response_obj
     
     return JsonResponse({"error": "Failed to download file"}, status=response.status_code)
 
 
 def delete_google_drive_file(request, file_id):
-    """Deletes a file from Google Drive using direct API requests."""
+    """Deletes a file from Google Drive and removes it from the database."""
     access_token = get_access_token(request)
     if not isinstance(access_token, str):
         return access_token
@@ -63,6 +72,7 @@ def delete_google_drive_file(request, file_id):
     
     response = requests.delete(url, headers=headers)
     if response.status_code == 204:
+        GoogleDriveFile.objects.filter(file_id=file_id).delete()
         return redirect(reverse("list_google_drive_files"))
     
     return JsonResponse({"error": "Failed to delete file"}, status=response.status_code)
@@ -70,7 +80,7 @@ def delete_google_drive_file(request, file_id):
 
 @csrf_exempt
 def upload_to_google_drive(request):
-    """Uploads a file to Google Drive using direct API requests."""
+    """Uploads a file to Google Drive and saves it to the database."""
     if request.method == "POST" and request.FILES.get("file"):
         uploaded_file = request.FILES["file"]
         access_token = get_access_token(request)
@@ -89,6 +99,12 @@ def upload_to_google_drive(request):
         response = requests.post(url, headers=headers, files=files)
 
         if response.status_code == 200:
+            file_data = response.json()
+            GoogleDriveFile.objects.create(
+                user=request.user,
+                file_id=file_data["id"],
+                name=file_data["name"]
+            )
             return redirect(reverse("list_google_drive_files"))
         
         return JsonResponse({"error": "Upload failed"}, status=response.status_code)
