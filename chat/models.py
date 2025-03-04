@@ -1,11 +1,20 @@
-# from django.contrib.auth.models import User
-# from django.db import models
+from django.db import models
+from django.conf import settings  # Import settings to get the custom user model
 
-# class ChatMessage(models.Model):
-#     sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='sent_messages')
-#     receiver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_messages')
-#     message = models.TextField()
-#     timestamp = models.DateTimeField(auto_now_add=True)
+class Room(models.Model):
+    """ Model to store chat room details. """
+    name = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-#     def __str__(self):
-#         return f"{self.sender} -> {self.receiver}: {self.message[:20]}"
+    def __str__(self):
+        return self.name
+
+class Message(models.Model):
+    """ Model to store chat messages. """
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='messages')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Fixed the issue
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}: {self.content[:30]}"

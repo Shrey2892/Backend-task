@@ -47,17 +47,40 @@
             font-size: 16px;
             box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
             list-style: none;
+            display: flex;
+            flex-direction: column;
         }
 
         .message {
-            background: rgba(255, 255, 255, 0.6);
-            padding: 8px;
-            border-radius: 8px;
+            padding: 10px 15px;
+            border-radius: 15px;
             margin: 5px 0;
-            max-width: 80%;
-            display: inline-block;
+            max-width: 75%;
             word-wrap: break-word;
             font-size: 14px;
+            display: inline-block;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .message .username {
+            font-size: 12px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .message.sent {
+            background: #4CAF50;
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .message.received {
+            background: white;
+            color: black;
+            align-self: flex-start;
         }
 
         input {
@@ -107,7 +130,7 @@
 
     <script>
         const roomName = "general";
-        const username = prompt("Enter your username:")|| "Guest";
+        const username = prompt("Enter your username:") || "Guest";
         const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
 
         socket.onmessage = function(event) {
@@ -115,7 +138,14 @@
             const messageList = document.getElementById("messages");
             const newMessage = document.createElement("li");
             newMessage.classList.add("message");
-            newMessage.textContent = `${data.username}: ${data.message}`;
+
+            if (data.username === username) {
+                newMessage.classList.add("sent");
+            } else {
+                newMessage.classList.add("received");
+            }
+
+            newMessage.innerHTML = `<span class="username">${data.username}</span>${data.message}`;
             messageList.appendChild(newMessage);
             messageList.scrollTop = messageList.scrollHeight;
         };
