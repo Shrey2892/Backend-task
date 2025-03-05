@@ -97,6 +97,7 @@ def upload_to_google_drive(request):
         }
 
         response = requests.post(url, headers=headers, files=files)
+        response_data = response.json()
 
         if response.status_code == 200:
             file_data = response.json()
@@ -107,6 +108,9 @@ def upload_to_google_drive(request):
             )
             return redirect(reverse("list_google_drive_files"))
         
-        return JsonResponse({"error": "Upload failed"}, status=response.status_code)
+        print("Google Drive Upload Error:", response_data)  # Logs error in terminal
+        return JsonResponse({"error": "Upload failed", "details": response_data}, status=response.status_code)
+        
+        #return JsonResponse({"error": "Upload failed"}, status=response.status_code)
 
     return render(request, "upload.html")

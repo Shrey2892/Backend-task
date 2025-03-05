@@ -199,7 +199,7 @@
 
             <p>Welcome, <strong id="username">{{ username }}</strong>!</p>
 
-            <a href="#" class="btn dashboard-btn" id="userInfoBtn">User Info</a>
+            <!--<a href="#" class="btn dashboard-btn" id="userInfoBtn">User Info</a>-->
             <a href="{% url 'google_logout' %}" class="btn logout-btn">Logout</a>
         </div>
 
@@ -207,6 +207,7 @@
         <div class="chat-card">
             <h2>Join Chat</h2>
             <p>Start a conversation.</p>
+            <a href ="{% url 'create_room' %}" class="btn dashboard-btn" id="userInfoBtn">Create Room</a>
             <a href="{% url 'chat_home' %}" class="btn chat-btn" id="joinChatBtn">Join Chat</a>
         </div>
     </div>
@@ -219,7 +220,7 @@
     </div>
 
     <script>
-        document.getElementById("userInfoBtn").addEventListener("click", function (event) {
+        document.getElementById("userInfoBtn1").addEventListener("click", function (event) {
             event.preventDefault(); // Prevent default link behavior
 
             const userDetailsCard = document.getElementById("userDetailsCard");

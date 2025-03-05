@@ -28,3 +28,6 @@ def create_room(request):
             return redirect("chat_room", room_name=room.name)
     
     return render(request, "chat/create_room.html")
+
+
+
