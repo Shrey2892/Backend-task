@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Home</title>
+    <style>
+        /* General body styling */
+        body {
+            background: linear-gradient(135deg, #b3cdd1, #5c8599);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+        }
+
+        /* Chat container */
+        .chat-container {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 400px;
+            transition: transform 0.3s;
+        }
+
+        .chat-container:hover {
+            transform: scale(1.02);
+        }
+
+        /* Heading */
+        h2 {
+            margin-bottom: 20px;
+            color: #fff;
+            font-size: 22px;
+        }
+
+        /* Input field */
+        input {
+            width: 90%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            font-size: 16px;
+            box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Join button */
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2874A6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: #1A5276;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Enter Chat Room</h2>
+        <!--<form action="{% url 'chat_room' room_name='test' %}" method="get">
+            <input type="text" name="room_name" placeholder="Enter Room Name" required>
+            <button type="submit">Join</button>
+        </form>-->
+        <form id="chat-form">
+            <input type="text" id="room-name-input" placeholder="Enter Room Name" required>
+            <button type="submit">Join</button>
+        </form>
+        
+    </div>
+</body>
+<script>
+    document.getElementById("chat-form").addEventListener("submit", function(event) {
+        event.preventDefault();  // Prevent form submission
+        let roomName = document.getElementById("room-name-input").value.trim();
+
+        if (roomName) {
+            window.location.href = `/chat/${roomName}/`;  // Redirect to the chat room
+        }
+    });
+</script>
+
+</html>

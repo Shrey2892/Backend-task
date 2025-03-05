@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Successful</title>
+    <style>
+        /* Background styling */
+        body {
+            background: linear-gradient(135deg, #b3cdd1, #5c8599);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+        }
+
+        /* Container for the cards */
+        .card-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            left: -30px;
+
+        }
+
+        /* Common card styles */
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            height: 300px;
+            width: 420px; /* Keep the login card at original size */
+            transition: transform 0.3s;
+        }
+
+        .google-drive-card, .chat-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            padding: 15px; /* Reduce padding */
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 320px; /* Reduced width */
+            height: 180px; /* Reduced height */
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .container:hover, .google-drive-card:hover, .chat-card:hover {
+            transform: scale(1.03);
+        }
+
+        /* Heading */
+        h2 {
+            margin-bottom: 10px;
+            color: #fff;
+            font-size: 20px;
+        }
+
+        /* Button styles */
+        .btn {
+            display: inline-block;
+            width: 90%;
+            padding: 8px; /* Reduce button padding */
+            margin-top: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            text-decoration: none;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .dashboard-btn:hover {
+            background: #388E3C;
+            transform: translateY(-2px);
+        }
+
+        .logout-btn {
+            background: #d9534f;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            background: #c9302c;
+            transform: translateY(-2px);
+        }
+
+        .drive-btn {
+            background: #4285F4;
+            color: white;
+        }
+
+        .drive-btn:hover {
+            background: #357AE8;
+            transform: translateY(-2px);
+        }
+
+        .chat-btn {
+            background: #ff9800;
+            color: white;
+        }
+
+        .chat-btn:hover {
+            background: #e68900;
+            transform: translateY(-2px);
+        }
+
+        /* User details card */
+        .user-details-card {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .user-image {
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .user-info p {
+            color: #fff;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .user-icon svg {
+            width: 50px;
+            height: 50px;
+            fill: white;
+        }
+
+        .user-icon {
+            width: 80px;
+            height: 80px;
+            background: #2874A6;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px auto;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .card-container {
+                flex-direction: column;
+                align-items: center;
+                
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card-container">
+        <!-- Google Drive Access Card (Left) -->
+        <div class="google-drive-card">
+            <h2>Google Drive</h2>
+            <p>Access your files easily.</p>
+            <a href="{% url 'list_google_drive_files' %}" class="btn drive-btn" id="driveAccessBtn">Access Drive</a>
+        </div>
+
+        <!-- Login Success Container (Center) -->
+        <div class="container">
+            <h2>Login Successful!</h2>
+
+            <!-- User Icon (SVG) -->
+            <!-- <div class="user-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/>
+                </svg>
+            </div> -->
+
+            <div class="user-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/>
+                </svg>
+            </div>
+
+            <p>Welcome, <strong id="username">{{ username }}</strong>!</p>
+
+            <!--<a href="#" class="btn dashboard-btn" id="userInfoBtn">User Info</a>-->
+            <a href="{% url 'google_logout' %}" class="btn logout-btn">Logout</a>
+        </div>
+
+        <!-- Join Chat Card (Right) -->
+        <div class="chat-card">
+            <h2>Join Chat</h2>
+            <p>Start a conversation.</p>
+            <a href ="{% url 'create_room' %}" class="btn dashboard-btn" id="userInfoBtn">Create Room</a>
+            <a href="{% url 'chat_home' %}" class="btn chat-btn" id="joinChatBtn">Join Chat</a>
+        </div>
+    </div>
+
+    <!-- User Details Card -->
+    <div class="user-details-card" id="userDetailsCard">
+        <img id="userImage" src="" alt="User Image" class="user-image">
+        <p><strong>Name:</strong> <span id="userName"></span></p>
+        <p><strong>Email:</strong> <span id="userEmail"></span></p>
+    </div>
+
+    <script>
+        document.getElementById("userInfoBtn1").addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent default link behavior
+
+            const userDetailsCard = document.getElementById("userDetailsCard");
+
+            // Toggle visibility
+            if (userDetailsCard.style.display === "block") {
+                userDetailsCard.style.display = "none";
+            } else {
+                // Fetch data only if not already shown
+                fetch("{% url 'user-info' %}")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert("Failed to fetch user info.");
+                            return;
+                        }
+
+                        document.getElementById("userName").innerText = data.name;
+                        document.getElementById("userEmail").innerText = data.email;
+                        document.getElementById("userImage").src = data.picture || "default-avatar.png";
+
+                        userDetailsCard.style.display = "block";
+                    })
+                    .catch(error => console.error("Error fetching user info:", error));
+            }
+        });
+    </script>
+
+</body>
+</html>

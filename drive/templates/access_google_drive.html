@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Drive File Upload</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #b3cdd1, #5c8599);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 420px;
+        }
+        h2 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 15px auto;
+            color: white;
+        }
+        .btn {
+            display: block;
+            width: 90%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            font-weight: bold;
+        }
+        .upload-btn { background: #4CAF50; color: white; }
+        .upload-btn:hover { background: #388E3C; }
+        .dashboard-btn { background: #2874A6; color: white; }
+        .dashboard-btn:hover { background: #1A5276; }
+        .logout-btn { background: #d9534f; color: white; }
+        .logout-btn:hover { background: #c9302c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Upload File to Google Drive</h2>
+        <input type="file" id="fileInput">
+        <button class="btn upload-btn" onclick="uploadFile()">Upload</button>
+        <a href="/dashboard" class="btn dashboard-btn">Dashboard</a>
+        <a href="/logout" class="btn logout-btn">Logout</a>
+        <p id="message" style="color: white; margin-top: 10px;"></p>
+    </div>
+
+    <script>
+        function uploadFile() {
+            let fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                document.getElementById('message').innerText = "Please select a file first.";
+                return;
+            }
+
+            let file = fileInput.files[0];
+            let formData = new FormData();
+            formData.append("file", file);
+
+            fetch("/api/upload-to-google-drive", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('message').innerText = data.message || data.error;
+            })
+            .catch(error => {
+                document.getElementById('message').innerText = "Error uploading file.";
+            });
+        }
+    </script>
+</body>
+</html>

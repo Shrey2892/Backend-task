@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logged Out</title>
+    <style>
+        /* Background styling */
+        body {
+            background: linear-gradient(135deg, #b3cdd1, #5c8599);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+        }
+
+        /* Logout container */
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 420px;
+            transition: transform 0.3s;
+        }
+
+        .container:hover {
+            transform: scale(1.03);
+        }
+
+        /* Heading */
+        h2 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 24px;
+        }
+
+        /* User icon */
+        .user-icon {
+            width: 80px;
+            height: 80px;
+            background: #d9534f;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px auto;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-icon svg {
+            width: 50px;
+            height: 50px;
+            fill: white;
+        }
+
+        /* User text */
+        .user-info p {
+            color: #fff;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        /* Button styles */
+        .btn {
+            display: inline-block;
+            width: 90%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            text-decoration: none;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-btn {
+            background: #2874A6;
+            color: white;
+        }
+
+        .login-btn:hover {
+            background: #1f5b7a;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>You have been logged out.</h2>
+
+        <!-- User Icon (SVG) -->
+        <div class="user-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/>
+            </svg>
+        </div>
+
+        <p>We hope to see you again soon!</p>
+
+        <a href="{% url 'google_login' %}" class="btn login-btn">Login Again</a>
+    </div>
+
+    <!-- Prevent backtracking -->
+    <script>
+        // Disable back button
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.pushState(null, null, location.href);
+        };
+
+        // Optional: Redirect user to login page if they try to go back
+        window.addEventListener('popstate', function () {
+            window.location.href = "{% url 'google_logout' %}";
+        });
+    </script>
+
+</body>
+</html>
