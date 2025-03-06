@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,18 +23,9 @@
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
             text-align: center;
             width: 400px;
-            transition: transform 0.3s;
         }
 
-        .chat-container:hover {
-            transform: scale(1.02);
-        }
-
-        h2 {
-            font-size: 22px;
-            color: #fff;
-            margin-bottom: 15px;
-        }
+        h2 { color: #fff; }
 
         #messages {
             height: 250px;
@@ -46,7 +36,6 @@
             color: #333;
             text-align: left;
             font-size: 16px;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
             list-style: none;
             display: flex;
             flex-direction: column;
@@ -61,70 +50,31 @@
             font-size: 14px;
             display: inline-block;
             position: relative;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .message .username {
-            font-size: 12px;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 3px;
-        }
+        .sent { background: #4CAF50; color: white; align-self: flex-end; text-align: right; }
+        .received { background: white; color: black; align-self: flex-start; }
 
-        .message.sent {
-            background: #4CAF50;
-            color: white;
-            align-self: flex-end;
-            text-align: right;
-        }
-
-        .message.received {
-            background: white;
-            color: black;
-            align-self: flex-start;
-        }
-
-        input {
+        input, button {
             width: 90%;
             padding: 12px;
             margin-top: 10px;
             border: none;
             border-radius: 8px;
-            outline: none;
             font-size: 16px;
-            box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.1);
-            transition: 0.3s;
-        }
-
-        input:focus {
-            background: rgba(255, 255, 255, 0.9);
         }
 
         button {
-            width: 100%;
-            padding: 12px;
-            background: #2874A6;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 17px;
-            cursor: pointer;
-            transition: 0.3s ease-in-out;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-            margin-top: 10px;
+            background: #2874A6; color: white;
+            cursor: pointer; transition: 0.3s ease-in-out;
         }
 
-        button:hover {
-            background: #1A5276;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-        }
+        button:hover { background: #1A5276; }
     </style>
 </head>
-
 <body>
     <div class="chat-container">
-        <h2>Chat Room: {{ room_name }}</h2>
+        <h2>Chat Room: general</h2>
         <ul id="messages"></ul>
         <input id="messageInput" type="text" placeholder="Type a message...">
         <button onclick="sendMessage()">Send</button>
@@ -133,37 +83,38 @@
     <script>
         const roomName = "general";
         const username = prompt("Enter your username:") || "Guest";
-        //const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
-        const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-        const socket = new WebSocket(`${protocol}://${window.location.host}/ws/chat/${roomName}/`);
+        const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
 
+        socket.onopen = function () {
+            console.log("Connected to WebSocket");
+        };
 
         socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
             const messageList = document.getElementById("messages");
-            const newMessage = document.createElement("li");
-            newMessage.classList.add("message");
 
-            if (data.username === username) {
-                newMessage.classList.add("sent");
+            if (data.history) {
+                data.history.forEach(msg => addMessage(msg.username, msg.message));
             } else {
-                newMessage.classList.add("received");
+                addMessage(data.username, data.message);
             }
-
-            newMessage.innerHTML = `<span class="username">${data.username}</span>${data.message}`;
-            messageList.appendChild(newMessage);
-            messageList.scrollTop = messageList.scrollHeight;
         };
 
         function sendMessage() {
             const input = document.getElementById("messageInput");
             const message = input.value.trim();
             if (message !== "") {
-                socket.send(JSON.stringify({ "message": message, "username": username }));
+                socket.send(JSON.stringify({"message": message, "username": username}));
                 input.value = "";
             }
         }
+
+        function addMessage(user, message) {
+            const newMessage = document.createElement("li");
+            newMessage.classList.add("message", user === username ? "sent" : "received");
+            newMessage.innerHTML = `<strong>${user}:</strong> ${message}`;
+            document.getElementById("messages").appendChild(newMessage);
+        }
     </script>
 </body>
-
 </html>
