@@ -5,7 +5,7 @@ from .models import Room, Message
 def chat_home(request):
     """ Renders the chat home page where users can enter or create a room. """
     rooms = Room.objects.all()
-    return render(request, 'chat/home.html', {'rooms': rooms})
+    return render(request, 'chat/join_room.html', {'rooms': rooms})
 
 @login_required
 def chat_room(request, room_name):

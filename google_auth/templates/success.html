@@ -219,35 +219,7 @@
         <p><strong>Email:</strong> <span id="userEmail"></span></p>
     </div>
 
-    <script>
-        document.getElementById("userInfoBtn1").addEventListener("click", function (event) {
-            event.preventDefault(); // Prevent default link behavior
-
-            const userDetailsCard = document.getElementById("userDetailsCard");
-
-            // Toggle visibility
-            if (userDetailsCard.style.display === "block") {
-                userDetailsCard.style.display = "none";
-            } else {
-                // Fetch data only if not already shown
-                fetch("{% url 'user-info' %}")
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            alert("Failed to fetch user info.");
-                            return;
-                        }
-
-                        document.getElementById("userName").innerText = data.name;
-                        document.getElementById("userEmail").innerText = data.email;
-                        document.getElementById("userImage").src = data.picture || "default-avatar.png";
-
-                        userDetailsCard.style.display = "block";
-                    })
-                    .catch(error => console.error("Error fetching user info:", error));
-            }
-        });
-    </script>
+    
 
 </body>
 </html>

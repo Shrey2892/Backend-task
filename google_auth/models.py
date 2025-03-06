@@ -17,6 +17,8 @@ class CustomUser(AbstractUser):
     is_staff = models.BooleanField(default=False)  # Admin access flag
     is_superuser = models.BooleanField(default=False)  # Superuser flag
     last_login = models.DateTimeField(null=True, blank=True, default=now)
+    
+    is_logged_in = models.BooleanField(default=False)  # Track logged-in status
 
     groups = models.ManyToManyField("auth.Group", blank=True)
     user_permissions = models.ManyToManyField("auth.Permission", blank=True)
@@ -30,3 +32,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email if self.email else self.username
+
+    def set_logged_in(self, status):
+        self.is_logged_in = status
+        self.save(update_fields=["is_logged_in"])
