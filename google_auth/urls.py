@@ -1,15 +1,16 @@
 from django.urls import path
-from .views import google_login, google_callback,logout_view,google_logout,login_view
-from django.views.generic import TemplateView
+from . import views_web, views_api
 
 urlpatterns = [
-    path('login/', google_login, name='google_login'),
-    path('callback/', google_callback, name='google_callback'),
-    path('login-success',login_view,name="login_view"),
-    #path('user-info/',get_google_user_info,name="user-info"),
-    #path('google/drive/files',list_google_drive_files,name="drive-files"),
-    path('logout/',logout_view,name="logout"),
-    path('google_logout',google_logout,name="google_logout"),
-    #path('users/',get_all_users,name="users"),
+    # Web-based authentication
+    path("login/", views_web.google_login, name="google_login"),
+    path("callback/", views_web.google_callback, name="google_callback"),
+    path("logout/", views_web.google_logout, name="google_logout"),
+    path("dashboard/", views_web.login_view, name="login_view"),
+    path("logout-page/", views_web.logout_view, name="logout_view"),
 
+    # API-based authentication
+    path("api/login/", views_api.google_login_api, name="google_login_api"),
+    path("api/callback/", views_api.google_callback_api, name="google_callback_api"),
+    path("api/logout/", views_api.google_logout_api, name="google_logout_api"),
 ]

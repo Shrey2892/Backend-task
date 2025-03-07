@@ -1,127 +1,153 @@
-from django.shortcuts import redirect, render
-from django.utils.timezone import now, timedelta, make_aware
-from django.http import JsonResponse, HttpResponseRedirect
-from django.urls import reverse
+from django.utils.timezone import now, timedelta
+from django.contrib.auth import login, logout
+from django.conf import settings
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from django.http import JsonResponse
 import requests
 import os
-from dotenv import load_dotenv
-from datetime import datetime
-from django.contrib.auth import login, logout
 from .models import CustomUser
 import logging
-
+from dotenv import load_dotenv
+load_dotenv()
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
+@api_view(["GET"])
+@permission_classes([AllowAny])
 def google_login(request):
-    """ Redirects user to Google's OAuth 2.0 authentication page. """
+    """Returns the Google OAuth URL for authentication."""
     auth_url = (
         "https://accounts.google.com/o/oauth2/auth?"
         "response_type=code"
-        f"&client_id={os.getenv('GOOGLE_CLIENT_ID')}"
-        f"&redirect_uri={os.getenv('GOOGLE_REDIRECT_URI')}"
+        f"&client_id={GOOGLE_CLIENT_ID}"
+        f"&redirect_uri={GOOGLE_REDIRECT_URI}"
         "&scope=openid email profile https://www.googleapis.com/auth/drive.file"
         "&access_type=offline"
         "&prompt=consent"
     )
-    return redirect(auth_url)
+    return Response({"auth_url": auth_url})
 
+@api_view(["GET"])
+@permission_classes([AllowAny])
 def google_callback(request):
-    """ Handles Google OAuth callback, fetches user info, and manages session. """
+    """Handles Google OAuth callback and returns user data."""
     code = request.GET.get("code")
     if not code:
-        return JsonResponse({"error": "Authorization code missing"}, status=400)
+        return Response({"error": "Authorization code missing"}, status=400)
 
     token_url = "https://oauth2.googleapis.com/token"
     data = {
         "code": code,
-        "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-        "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
-        "redirect_uri": os.getenv("GOOGLE_REDIRECT_URI"),
+        "client_id": GOOGLE_CLIENT_ID,
+        "client_secret": GOOGLE_CLIENT_SECRET,
+        "redirect_uri": GOOGLE_REDIRECT_URI,
         "grant_type": "authorization_code",
     }
 
-    response = requests.post(token_url, data=data)
-    token_info = response.json()
+    try:
+        response = requests.post(token_url, data=data, timeout=10)
+        response.raise_for_status()
+        token_info = response.json()
+    except requests.RequestException as e:
+        logger.error(f"Failed to fetch token: {e}")
+        return Response({"error": "Failed to retrieve access token"}, status=500)
 
     if "error" in token_info:
-        return JsonResponse({"error": token_info.get("error_description", "Unknown error")}, status=400)
+        return Response({"error": token_info.get("error_description", "Unknown error")}, status=400)
 
     access_token = token_info.get("access_token")
-    refresh_token = token_info.get("refresh_token")
+    refresh_token = token_info.get("refresh_token", None)  # May be None if already granted
     expires_in = token_info.get("expires_in", 3600)
 
     # Fetch user info
-    user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
-    headers = {"Authorization": f"Bearer {access_token}"}
-    user_response = requests.get(user_info_url, headers=headers)
-    user_data = user_response.json()
+    try:
+        user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+        headers = {"Authorization": f"Bearer {access_token}"}
+        user_response = requests.get(user_info_url, headers=headers, timeout=10)
+        user_response.raise_for_status()
+        user_data = user_response.json()
+    except requests.RequestException as e:
+        logger.error(f"Failed to fetch user info: {e}")
+        return Response({"error": "Failed to retrieve user information"}, status=500)
 
     google_id = user_data.get("id")
     email = user_data.get("email")
     name = user_data.get("name")
     profile_picture = user_data.get("picture")
 
+    if not email:
+        return Response({"error": "Email not provided by Google"}, status=400)
+
     # Save or update user in database
     user, created = CustomUser.objects.get_or_create(email=email, defaults={
         "username": name,
         "google_id": google_id,
         "profile_image": profile_picture,
-        "refresh_token": refresh_token,
         "is_logged_in": True,
     })
 
     if not created:
-        if refresh_token:
-            user.refresh_token = refresh_token
-        user.is_logged_in = True
-        user.save()
+        update_fields = {"is_logged_in": True}
+        if refresh_token:  
+            update_fields["refresh_token"] = refresh_token  
+        CustomUser.objects.filter(id=user.id).update(**update_fields)
 
     # Log the user in
     login(request, user)
 
-    # Store user session data
+    # Store user session securely
     request.session["user_id"] = user.id
-    request.session["user_email"] = user.email
     request.session["is_authenticated"] = True
-    request.session["access_token"] = access_token
-    request.session["refresh_token"] = refresh_token
     request.session["expires_at"] = (now() + timedelta(seconds=expires_in)).isoformat()
     request.session.set_expiry(expires_in)
 
-    return redirect("login_view")
+    return Response({
+        "message": "Login successful",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "profile_image": user.profile_image,
+        },
+        "access_token": access_token,
+        "expires_in": expires_in,
+    })
 
-def login_view(request):
-    user_id = request.session.get("user_id")
-    if not user_id:
-        return redirect("google_login")
-
-    user = CustomUser.objects.get(id=user_id)
-    return render(request, "success.html", {"username": user.username})
-
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def google_logout(request):
-    """ Logs the user out from Google and clears session. """
+    """Logs out the user and revokes the Google OAuth token."""
     token = request.session.get("access_token")
     if token:
-        requests.post("https://accounts.google.com/o/oauth2/revoke", params={"token": token})
+        try:
+            requests.post("https://accounts.google.com/o/oauth2/revoke", params={"token": token}, timeout=5)
+        except requests.RequestException as e:
+            logger.error(f"Failed to revoke Google token: {e}")
 
-    # Update user status to logged out
     user_id = request.session.get("user_id")
     if user_id:
-        try:
-            user = CustomUser.objects.get(id=user_id)
-            user.is_logged_in = False
-            user.save()
-        except CustomUser.DoesNotExist:
-            pass
+        CustomUser.objects.filter(id=user_id).update(is_logged_in=False)
 
-    # Clear session data
     request.session.flush()
-    
     logout(request)
-    return HttpResponseRedirect(reverse("logout"))
 
-def logout_view(request):
-    """ Renders the logout page. """
-    return render(request, "logout.html")
+    return Response({"message": "Logout successful"})
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_user_info(request):
+    """Returns logged-in user details."""
+    user = request.user
+    return Response({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "profile_image": user.profile_image,
+        "is_logged_in": user.is_logged_in,
+    })
+
+

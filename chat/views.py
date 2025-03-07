@@ -19,6 +19,25 @@ def chat_room(request, room_name):
         "messages": messages
     })
 
+
+@login_required
+def chat_home(request):
+    """ Renders the chat home page where users can enter or create a room. """
+    rooms = Room.objects.all()  # Get all available rooms
+
+    if request.method == "POST":
+        room_name = request.POST.get("room_name")
+        
+        if room_name:
+            try:
+                room = Room.objects.get(name=room_name)  # Try to fetch the room
+                return redirect("chat_room", room_name=room.name)  # If room exists, redirect to that room
+            except Room.DoesNotExist:
+                # If the room doesn't exist, show an error message
+                messages.error(request, "Room does not exist. Please choose a valid room name.")
+    
+    return render(request, 'chat/join_room.html', {'rooms': rooms})
+
 @login_required
 def creates_room(request):
     """ Allows users to create a new chat room. """
