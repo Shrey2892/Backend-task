@@ -123,3 +123,7 @@ def google_logout(request):
 def logout_view(request):
     """ Renders the logout page. """
     return render(request, "logout.html")
+
+
+def main(request):
+    return render(request,"main.html")
