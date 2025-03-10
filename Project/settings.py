@@ -162,10 +162,11 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("rediss://joint-marten-60522.upstash.io")],  # Replace with your Upstash URL
+            "hosts": [os.getenv("REDIS_URL", "rediss://your-upstash-redis-url:6379")],
         },
     },
 }
+
 
 
 
