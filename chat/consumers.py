@@ -12,13 +12,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f"chat_{self.room_name}"
 
-        # Get or create the chat room
-        self.room = await sync_to_async(Room.objects.get_or_create)(name=self.room_name)
+        # ✅ Fix: Ensure `get_or_create()` works correctly
+        self.room, _ = await sync_to_async(Room.objects.get_or_create)(name=self.room_name)
 
+        # ✅ Add WebSocket to Redis channel group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
-        # Send chat history on connection
+        # ✅ Send chat history
         await self.send_chat_history()
 
     async def disconnect(self, close_code):
@@ -37,10 +38,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except User.DoesNotExist:
             return  # Ignore messages from non-existent users
 
-        # Save message to database
+        # ✅ Save message to PostgreSQL
         new_message = await self.save_message(user, message)
 
-        # Broadcast message to group
+        # ✅ Send message to Redis channel
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -52,21 +53,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def chat_message(self, event):
+        """Receive message from Redis and send to WebSocket."""
         await self.send(text_data=json.dumps(event))
 
     @sync_to_async
     def save_message(self, user, message):
+        """Save message to PostgreSQL."""
         return Message.objects.create(
-            room=self.room[0],  # `get_or_create` returns (obj, created)
+            room=self.room,  # ✅ No need for `self.room[0]`
             user=user,
             content=message,
             timestamp=now()
         )
 
     async def send_chat_history(self):
-        """Send the last 20 messages to the user on connection."""
+        """Send last 20 messages to the user on connection."""
         messages = await sync_to_async(list)(
-            Message.objects.filter(room=self.room[0]).order_by('-timestamp')[:20]
+            Message.objects.filter(room=self.room).order_by('-timestamp')[:20]
         )
         messages.reverse()  # Show oldest first
 
