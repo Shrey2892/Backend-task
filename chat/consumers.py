@@ -1,5 +1,5 @@
 import json
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.consumer import AsyncConsumer
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from asgiref.sync import sync_to_async
@@ -7,7 +7,7 @@ from .models import Room, Message
 
 User = get_user_model()
 
-class ChatConsumer(AsyncWebsocketConsumer):
+class ChatConsumer(AsyncConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f"chat_{self.room_name}"
