@@ -152,11 +152,21 @@ ASGI_APPLICATION = 'Project.asgi.application'
 
 
 # WebSocket Channel Layer (Ensure Redis is installed and running)
+#CHANNEL_LAYERS = {
+    #"default": {
+      #  "BACKEND": "channels.layers.InMemoryChannelLayer",
+    #},
+#}
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("rediss://joint-marten-60522.upstash.io")],  # Replace with your Upstash URL
+        },
     },
 }
+
 
 
 
