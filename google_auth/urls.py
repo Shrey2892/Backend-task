@@ -3,7 +3,7 @@ from . import views_web, views_api
 
 urlpatterns = [
     # Web-based authentication
-    path(" ",views_web.main,name="main_page"),
+    path('',views_web.main,name="main_page"),
     path("auth/login/", views_web.google_login, name="google_login"),
     path("auth/callback/", views_web.google_callback, name="google_callback"),
     path("auth/logout/", views_web.google_logout, name="google_logout"),
