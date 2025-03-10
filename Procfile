@@ -1,1 +1,1 @@
-web: uvicorn Project.asgi:application --host 0.0.0.0 --port $PORT
+web: gunicorn -k uvicorn.workers.UvicornWorker Project.asgi:application --bind 0.0.0.0:8000
