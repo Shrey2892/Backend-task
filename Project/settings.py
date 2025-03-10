@@ -41,9 +41,7 @@ DATABASES = {
     'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
 }
 
-from channels.layers import get_channel_layer
 
-DEFAULT_CHANNEL_LAYER = get_channel_layer()
 
 
 
@@ -94,7 +92,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Project.wsgi.application'
+WSGI_APPLICATION = None
 
 
 # Database
