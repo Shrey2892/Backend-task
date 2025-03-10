@@ -84,7 +84,7 @@
         const roomName = "general";
         const username = prompt("Enter your username:") || "Guest";
         //const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
-        const socket = new WebSocket("wss://backend-task-gkx8.onrender.com/ws/chat/general/");
+        const socket = new WebSocket("wss://backend-task-gkx8.onrender.com/ws/chat/{room_name}/");
 
 
         socket.onopen = function () {
