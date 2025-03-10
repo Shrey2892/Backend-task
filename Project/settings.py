@@ -151,23 +151,65 @@ ASGI_APPLICATION = 'Project.asgi.application'
 
 
 
-# WebSocket Channel Layer (Ensure Redis is installed and running)
+
+
 #CHANNEL_LAYERS = {
     #"default": {
-      #  "BACKEND": "channels.layers.InMemoryChannelLayer",
+      #  "BACKEND": "channels_redis.core.RedisChannelLayer",
+       # "CONFIG": {
+          #  "hosts": [os.getenv("REDIS_URL")],  # Fetching from Render environment
+        #},
     #},
 #}
 
+
+#CHANNEL_LAYERS = {
+    #"default": {
+        #"BACKEND": "channels_redis.core.RedisChannelLayer",
+        #"CONFIG": {
+           # "hosts": ["redis://@joint-marten-60522.upstash.io:6379"],
+
+#},
+    #},
+#}
+
+# settings.py
+
+import os
+
+# Redis URL Configuration
+REDIS_HOST = "joint-marten-60522.upstash.io"
+REDIS_PORT = 6379
+REDIS_USERNAME = "default"  # Upstash uses "default" as the username
+REDIS_PASSWORD = "AexqAAIjcDEzOGNkMTUyMzAzZjQ0M2FhOWQzNDdmNTljODcwMWI5ZnAxMA"
+REDIS_SSL = True  # Upstash requires SSL
+
+# Redis Connection URL
+REDIS_URL = f"rediss://{REDIS_USERNAME}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}"
+
+# ASGI CHANNEL LAYERS (for Django Channels)
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.getenv("REDIS_URL")],  # Fetching from Render environment
+            "hosts": [REDIS_URL],
         },
     },
 }
 
-print("REDIS_URL:", os.getenv("REDIS_URL"))
+# Django Cache using Redis
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
+print(REDIS_URL)
+#print("REDIS_URL:", os.getenv("REDIS_URL"))
 
 
 
@@ -176,7 +218,8 @@ print("REDIS_URL:", os.getenv("REDIS_URL"))
 
 
 # settings.py
-SESSION_ENGINE = "django.contrib.sessions.backends.db"  # or db if using DB sessions
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"  # or db if using DB sessions
+SESSION_CACHE_ALIAS = "default"
 SESSION_COOKIE_AGE = 60 * 60 * 24  # 1 day
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = True
