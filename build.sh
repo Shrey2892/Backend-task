@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-# Install the required Python version
-pyenv install 3.13.0
-pyenv global 3.13.0
+# Ensure the correct Python version is used (Render should pick from runtime.txt)
+python --version
 
-# Install dependencies from requirements.txt
+# Install dependencies
 pip install --no-cache-dir --force-reinstall -r requirements.txt
