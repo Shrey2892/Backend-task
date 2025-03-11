@@ -1,8 +1,0 @@
-services:
-  - name: django-app
-    type: web
-    env: docker
-    plan: free
-    region: oregon  # Change this based on your region
-    dockerfilePath: DockerFile
-    autoDeploy: true
