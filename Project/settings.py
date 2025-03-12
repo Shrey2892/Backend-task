@@ -61,7 +61,6 @@ INSTALLED_APPS = [
     'chat',
     'drive',
     'google_auth',
-    'channels',
 ]
 
 MIDDLEWARE = [
