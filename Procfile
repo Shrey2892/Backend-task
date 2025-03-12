@@ -1,1 +1,1 @@
-web: daphne -b 0.0.0.0 -p $PORT Project.asgi:application
+web: gunicorn -w 4 -k uvicorn.workers.UvicornWorker chat.fastapi_server:app --bind 0.0.0.0:$PORT
