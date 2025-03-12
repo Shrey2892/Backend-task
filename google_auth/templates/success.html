@@ -11,9 +11,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             font-family: 'Poppins', sans-serif;
             margin: 0;
+            padding: 20px;
         }
 
         /* Container for the cards */
@@ -22,34 +23,30 @@
             gap: 20px;
             justify-content: center;
             align-items: center;
-            position: relative;
-            left: -30px;
-
+            flex-wrap: wrap;
+            max-width: 900px;
+            width: 100%;
         }
 
         /* Common card styles */
-        .container {
+        .container, .google-drive-card, .chat-card {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(12px);
-            padding: 30px;
+            padding: 20px;
             border-radius: 15px;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
             text-align: center;
-            height: 300px;
-            width: 420px; /* Keep the login card at original size */
             transition: transform 0.3s;
         }
 
+        .container {
+            height: 300px;
+            width: 420px;
+        }
+
         .google-drive-card, .chat-card {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(12px);
-            padding: 15px; /* Reduce padding */
-            border-radius: 15px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-            text-align: center;
-            width: 320px; /* Reduced width */
-            height: 180px; /* Reduced height */
-            transition: transform 0.3s;
+            width: 320px;
+            height: 180px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -70,58 +67,29 @@
         .btn {
             display: inline-block;
             width: 90%;
-            padding: 8px; /* Reduce button padding */
+            padding: 8px;
             margin-top: 8px;
             border: none;
             border-radius: 8px;
             font-size: 14px;
             cursor: pointer;
-            transition: 0.3s ease-in-out;
             text-decoration: none;
             font-weight: bold;
             text-align: center;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .dashboard-btn {
-            background: #4CAF50;
-            color: white;
-        }
+        .dashboard-btn { background: #4CAF50; color: white; }
+        .dashboard-btn:hover { background: #388E3C; transform: translateY(-2px); }
 
-        .dashboard-btn:hover {
-            background: #388E3C;
-            transform: translateY(-2px);
-        }
+        .logout-btn { background: #d9534f; color: white; }
+        .logout-btn:hover { background: #c9302c; transform: translateY(-2px); }
 
-        .logout-btn {
-            background: #d9534f;
-            color: white;
-        }
+        .drive-btn { background: #4285F4; color: white; }
+        .drive-btn:hover { background: #357AE8; transform: translateY(-2px); }
 
-        .logout-btn:hover {
-            background: #c9302c;
-            transform: translateY(-2px);
-        }
-
-        .drive-btn {
-            background: #4285F4;
-            color: white;
-        }
-
-        .drive-btn:hover {
-            background: #357AE8;
-            transform: translateY(-2px);
-        }
-
-        .chat-btn {
-            background: #ff9800;
-            color: white;
-        }
-
-        .chat-btn:hover {
-            background: #e68900;
-            transform: translateY(-2px);
-        }
+        .chat-btn { background: #ff9800; color: white; }
+        .chat-btn:hover { background: #e68900; transform: translateY(-2px); }
 
         /* User details card */
         .user-details-card {
@@ -142,12 +110,6 @@
             margin-top: 10px;
         }
 
-        .user-icon svg {
-            width: 50px;
-            height: 50px;
-            fill: white;
-        }
-
         .user-icon {
             width: 80px;
             height: 80px;
@@ -161,11 +123,26 @@
         }
 
         /* Responsive */
-        @media (max-width: 1200px) {
+        @media (max-width: 900px) {
             .card-container {
                 flex-direction: column;
                 align-items: center;
-                
+            }
+
+            .container, .google-drive-card, .chat-card {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 18px;
+            }
+
+            .btn {
+                font-size: 13px;
+                padding: 6px;
             }
         }
     </style>
@@ -173,23 +150,16 @@
 <body>
 
     <div class="card-container">
-        <!-- Google Drive Access Card (Left) -->
+        <!-- Google Drive Access Card -->
         <div class="google-drive-card">
             <h2>Google Drive</h2>
             <p>Access your files easily.</p>
-            <a href="{% url 'list_google_drive_files' %}" class="btn drive-btn" id="driveAccessBtn">Access Drive</a>
+            <a href="{% url 'list_google_drive_files' %}" class="btn drive-btn">Access Drive</a>
         </div>
 
-        <!-- Login Success Container (Center) -->
+        <!-- Login Success Container -->
         <div class="container">
             <h2>Login Successful!</h2>
-
-            <!-- User Icon (SVG) -->
-            <!-- <div class="user-icon">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/>
-                </svg>
-            </div> -->
 
             <div class="user-icon">
                 <svg viewBox="0 0 24 24">
@@ -199,27 +169,24 @@
 
             <p>Welcome, <strong id="username">{{ username }}</strong>!</p>
 
-            <!--<a href="#" class="btn dashboard-btn" id="userInfoBtn">User Info</a>-->
             <a href="{% url 'google_logout' %}" class="btn logout-btn">Logout</a>
         </div>
 
-        <!-- Join Chat Card (Right) -->
+        <!-- Join Chat Card -->
         <div class="chat-card">
             <h2>Join Chat</h2>
             <p>Start a conversation.</p>
-            <a href ="{% url 'create_room' %}" class="btn dashboard-btn" id="userInfoBtn">Create Room</a>
-            <a href="{% url 'chat_home' %}" class="btn chat-btn" id="joinChatBtn">Join Chat</a>
+            <a href="{% url 'create_room' %}" class="btn dashboard-btn">Create Room</a>
+            <a href="{% url 'chat_home' %}" class="btn chat-btn">Join Chat</a>
         </div>
     </div>
 
     <!-- User Details Card -->
-    <div class="user-details-card" id="userDetailsCard">
+    <div class="user-details-card">
         <img id="userImage" src="" alt="User Image" class="user-image">
         <p><strong>Name:</strong> <span id="userName"></span></p>
         <p><strong>Email:</strong> <span id="userEmail"></span></p>
     </div>
-
-    
 
 </body>
 </html>
