@@ -172,6 +172,7 @@ def google_callback_api(request):
     try:
         user_response = requests.get(user_info_url, headers=headers)
         user_data = user_response.json()
+        email = email or user_data.get("email")
         logger.info(f"Google User Info Response: {user_data}")
     except requests.RequestException as e:
         logger.error(f"Failed to fetch user info: {e}")
