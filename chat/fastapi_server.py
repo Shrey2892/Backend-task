@@ -1,31 +1,27 @@
+import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import List
+from typing import Dict
 
 app = FastAPI()
 
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: List[WebSocket] = []
+# Dictionary to track connected WebSocket clients
+active_connections: Dict[str, WebSocket] = {}
 
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
+@app.websocket("/ws/chat/{room_name}/{username}")
+async def websocket_endpoint(websocket: WebSocket, room_name: str, username: str):
+    await websocket.accept()
+    active_connections[f"{room_name}:{username}"] = websocket
 
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
-
-manager = ConnectionManager()
-
-@app.websocket("/ws/chat/{room_name}")
-async def websocket_endpoint(websocket: WebSocket, room_name: str):
-    await manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.broadcast(data)  # Send message to all connected users
+            # Broadcast the message to all users in the same room
+            for key, connection in active_connections.items():
+                if key.startswith(room_name):
+                    await connection.send_text(f"{username}: {data}")
+
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        del active_connections[f"{room_name}:{username}"]
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8001)
