@@ -42,11 +42,22 @@
             margin: 8px 0;
             border-radius: 8px;
             color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .file-name {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
         }
         a, button {
             display: inline-block;
             padding: 10px 15px;
-            margin: 5px;
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
@@ -68,9 +79,11 @@
         <ul>
             {% for file in files %}
                 <li>
-                    {{ file.name }} -
-                    <a href="{% url 'download_google_drive_file' file.id %}" class="btn-download">Download</a>
-                    <a href="{% url 'delete_google_drive_file' file.id %}" class="btn-delete">Delete</a>
+                    <span class="file-name">{{ file.name }}</span>
+                    <div class="button-group">
+                        <a href="{% url 'download_google_drive_file' file.id %}" class="btn-download">Download</a>
+                        <a href="{% url 'delete_google_drive_file' file.id %}" class="btn-delete">Delete</a>
+                    </div>
                 </li>
             {% endfor %}
         </ul>
