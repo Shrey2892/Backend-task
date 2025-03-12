@@ -122,7 +122,8 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
-        /* Responsive */
+        /* Responsive Design */
+        /* For screen sizes below 900px */
         @media (max-width: 900px) {
             .card-container {
                 flex-direction: column;
@@ -135,6 +136,23 @@
             }
         }
 
+        /* For screen sizes below 768px */
+        @media (max-width: 768px) {
+            .container {
+                height: 250px;
+            }
+
+            .google-drive-card, .chat-card {
+                height: 150px;
+            }
+
+            .btn {
+                font-size: 12px;
+                padding: 6px;
+            }
+        }
+
+        /* For screen sizes below 600px (smaller mobile devices) */
         @media (max-width: 600px) {
             h2 {
                 font-size: 18px;
@@ -143,6 +161,35 @@
             .btn {
                 font-size: 13px;
                 padding: 6px;
+                width: 100%;
+            }
+
+            .user-image {
+                width: 60px;
+                height: 60px;
+            }
+
+            .user-info p {
+                font-size: 16px;
+            }
+
+            .google-drive-card, .chat-card {
+                width: 100%;
+                max-width: 280px;
+                height: 140px;
+            }
+        }
+
+        /* For very small screens (mobile portrait below 400px) */
+        @media (max-width: 400px) {
+            .container, .google-drive-card, .chat-card {
+                max-width: 90%;
+                margin: 10px 0;
+            }
+
+            .btn {
+                font-size: 12px;
+                padding: 5px;
             }
         }
     </style>
