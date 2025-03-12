@@ -189,25 +189,25 @@ REDIS_SSL = True  # Upstash requires SSL
 REDIS_URL = f"rediss://{REDIS_USERNAME}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}"
 
 # ASGI CHANNEL LAYERS (for Django Channels)
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [REDIS_URL],
-        },
-    },
-}
+#CHANNEL_LAYERS = {
+    #"default": {
+      #  "BACKEND": "channels_redis.core.RedisChannelLayer",
+       # "CONFIG": {
+        #    "hosts": [REDIS_URL],
+        #},
+    #},
+#}
 
 # Django Cache using Redis
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_URL,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
-    }
-}
+#CACHES = {
+   # "default": {
+      #  "BACKEND": "django.core.cache.backends.redis.RedisCache",
+       # "LOCATION": REDIS_URL,
+       # "OPTIONS": {
+       #     "CLIENT_CLASS": "django_redis.client.DefaultClient",
+       # },
+    #}
+#}
 
 print(REDIS_URL)
 #print("REDIS_URL:", os.getenv("REDIS_URL"))
